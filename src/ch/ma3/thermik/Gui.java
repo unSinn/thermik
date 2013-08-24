@@ -5,31 +5,35 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class Gui extends JFrame implements MouseMotionListener {
+public class Gui extends JFrame implements MouseMotionListener, InfoProvider {
 
 	private static final long serialVersionUID = 1516156985634156156L;
 	private BufferedImage heightImage;
 	private BufferedImage thermikImage;
-	private ArrayList<InfoProvider> infoProviders;
+	private ConcurrentLinkedQueue<InfoProvider> infoProviders;
 	private String info = "";
+	private int mouseX;
+	private int mouseY;
 
 	public Gui(BufferedImage heightImage) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("Thermik");
 
-		infoProviders = new ArrayList<>();
+		infoProviders = new ConcurrentLinkedQueue<>();
+		addInfoProvider(this);
 
 		this.heightImage = heightImage;
 		thermikImage = generatePlaceholderThermikMap();
 
-		this.add(new ImagePanel());
+		ImagePanel imagePanel = new ImagePanel();
+		imagePanel.addMouseMotionListener(this);
+		this.add(imagePanel);
 
-		this.addMouseMotionListener(this);
 		setSize(heightImage.getWidth(), heightImage.getHeight() * 2);
 		setVisible(true);
 	}
@@ -57,20 +61,28 @@ public class Gui extends JFrame implements MouseMotionListener {
 			g2d.drawImage(heightImage, null, 0, 0);
 			g2d.drawImage(thermikImage, null, 0, heightImage.getHeight());
 
-			g2d.drawString(info, 10, 10);
+			int line = 20;
+			for (InfoProvider i : infoProviders) {
+				g2d.drawString(i.getInfo(mouseX, mouseY), 10, line);
+				line += 12;
+			}
+
 		}
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
-
+		// unused
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		for (InfoProvider i : infoProviders) {
-			info = i.getInfo(e.getX(), e.getY());
-		}
+		mouseX = e.getX();
+		mouseY = e.getY();
+	}
+
+	@Override
+	public String getInfo(int x, int y) {
+		return "MouseX: " + mouseX + ", MouseY: " + mouseY;
 	}
 }

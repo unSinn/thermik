@@ -14,16 +14,12 @@ public class Main {
 		ThermikEngine thermikEngine = new ThermikEngine(heightImage, gui);
 		gui.setThermikImage(thermikEngine.getThermikImage());
 
-		while (true) {
-			thermikEngine.generateThermik();
-			gui.repaint();
+		Renderer renderer = new Renderer(gui);
+		Thread renderThread = new Thread(renderer);
+		renderThread.start();
 
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
+		Thread thermikThread = new Thread(thermikEngine);
+		thermikThread.start();
 
 	}
 }

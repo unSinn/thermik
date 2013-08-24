@@ -1,9 +1,11 @@
 package ch.ma3.thermik;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 
-public class ThermikEngine implements InfoProvider {
+public class ThermikEngine implements InfoProvider, Runnable {
 
 	private BufferedImage thermikImage;
 	private int[][] data;
@@ -39,9 +41,17 @@ public class ThermikEngine implements InfoProvider {
 		return thermikImage;
 	}
 
-	public void generateThermik() {
-		System.out.println("Data: " + data[0][0]);
-		thermikImage.getGraphics().drawLine(10, 10, 100, 100);
+	private void generateThermik() {
+		
+		
+		
+		drawThermikImage();
+	}
+
+	private void drawThermikImage() {
+		Graphics2D g2d = (Graphics2D) thermikImage.getGraphics();
+		g2d.setColor(Color.RED);
+		g2d.drawLine(10, 10, 100, 100);
 	}
 
 	@Override
@@ -49,7 +59,20 @@ public class ThermikEngine implements InfoProvider {
 		if (x < w && y < h) {
 			return "GrayValue: " + data[x][y];
 		}
-		return "Out of range";
+		return "Out of range!";
 
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			generateThermik();
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 }
